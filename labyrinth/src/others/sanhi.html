@@ -1,0 +1,247 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
+    <title>JavaScript | fetch() Method</title>
+</head>
+
+<body>
+    <h1>Select World for scan!</h1>
+    <select id="selectWorld" onchange="getSelected()">
+        <option value="world">Select World</option>
+        <option value="Adra">Adra</option>
+        <option value="Alumbra">Alumbra</option>
+        <option value="Antica">Antica</option>
+        <option value="Ardera">Ardera</option>
+        <option value="Astera">Astera</option>
+        <option value="Axera">Axera</option>
+        <option value="Bastia">Bastia</option>
+        <option value="Batabra">Batabra</option>
+        <option value="Belobra">Belobra</option>
+        <option value="Bombra">Bombra</option>
+        <option value="Bona">Bona</option>
+        <option value="Cadebra">Cadebra</option>
+        <option value="Calmera">Calmera</option>
+        <option value="Castela">Castela</option>
+        <option value="Celebra">Celebra</option>
+        <option value="Celesta">Celesta</option>
+        <option value="Collabra">Collabra</option>
+        <option value="Damora">Damora</option>
+        <option value="Descubra">Descubra</option>
+        <option value="Dibra">Dibra</option>
+        <option value="Epoca">Epoca</option>
+        <option value="Esmera">Esmera</option>
+        <option value="Famosa">Famosa</option>
+        <option value="Fera">Fera</option>
+        <option value="Ferobra">Ferobra</option>
+        <option value="Firmera">Firmera</option>
+        <option value="Gentebra">Gentebra</option>
+        <option value="Gladera">Gladera</option>
+        <option value="Harmonia">Harmonia</option>
+        <option value="Havera">Havera</option>
+        <option value="Honbra">Honbra</option>
+        <option value="Illusera">Illusera</option>
+        <option value="Impulsa">Impulsa</option>
+        <option value="Inabra">Inabra</option>
+        <option value="Issobra">Issobra</option>
+        <option value="Kalibra">Kalibra</option>
+        <option value="Karna">Karna</option>
+        <option value="Libertabra">Libertabra</option>
+        <option value="Lobera">Lobera</option>
+        <option value="Luminera">Luminera</option>
+        <option value="Lutabra">Lutabra</option>
+        <option value="Marbera">Marbera</option>
+        <option value="Marcia">Marcia</option>
+        <option value="Menera">Menera</option>
+        <option value="Monza">Monza</option>
+        <option value="Mudabra">Mudabra</option>
+        <option value="Mykera">Mykera</option>
+        <option value="Nadora">Nadora</option>
+        <option value="Nefera">Nefera</option>
+        <option value="Nossobra">Nossobra</option>
+        <option value="Ocebra">Ocebra</option>
+        <option value="Olima">Olima</option>
+        <option value="Ombra">Ombra</option>
+        <option value="Pacera">Pacera</option>
+        <option value="Peloria">Peloria</option>
+        <option value="Premia">Premia</option>
+        <option value="Quelibra">Quelibra</option>
+        <option value="Quintera">Quintera</option>
+        <option value="Refugia">Refugia</option>
+        <option value="Reinobra">Reinobra</option>
+        <option value="Seanera">Seanera</option>
+        <option value="Secura">Secura</option>
+        <option value="Serdebra">Serdebra</option>
+        <option value="Solidera">Solidera</option>
+        <option value="Suna">Suna</option>
+        <option value="Talera">Talera</option>
+        <option value="Tembra">Tembra</option>
+        <option value="Thyria">Thyria</option>
+        <option value="Trona">Trona</option>
+        <option value="Utobra">Utobra</option>
+        <option value="Venebra">Venebra</option>
+        <option value="Versa">Versa</option>
+        <option value="Visabra">Visabra</option>
+        <option value="Vunira">Vunira</option>
+        <option value="Wintera">Wintera</option>
+        <option value="Wizera">Wizera</option>
+        <option value="Xandebra">Xandebra</option>
+        <option value="Yonabra">Yonabra</option>
+        <option value="Zenobra">Zenobra</option>
+    </select>
+    <button onclick="playersOnline()">SCAN</button>
+    <button onclick="stop()">STOP SCAN</button>
+    <div id="charsInfo">
+
+    </div>
+
+    <script>
+        let init = true;
+        let world = "";
+        let deaths = 0;
+        let players = [];
+        let playersDeath = [];
+
+        function stop() {
+            init = false;
+        }
+
+        function getSelected() {
+            world = document.getElementById("selectWorld").value;
+        }
+
+        async function infiniteLoop() {
+            await playersOnline();
+        }
+
+        async function playersOnline() {
+            init = true;
+            if (world.length < 1) {
+                alert("Select world for scan");
+                return;
+            }
+            let players = [];
+            deaths = 0;
+            await fetch(`https://api.tibiadata.com/v3/world/${world}`)
+                .then(response => response.text())
+                .then(async result => {
+                    const data = JSON.parse(result);
+                    const playersOnline = data.worlds.world.online_players
+                    for (let player of playersOnline) {
+                        if (player.level >= 1) {
+                            players.push(player.name);
+                        }
+                    }
+                    console.log(players);
+                    for (let player of players) {
+                        console.log("Comprobando...");
+                        await getLastDeathPlayer(player);
+                    }
+                    init === true ? infiniteLoop() : init = false;
+                })
+                .catch(error => console.log('error', error));
+        }
+
+        async function getLastDeathPlayer(player) {
+            await fetch(`https://api.tibiadata.com/v3/character/${player}`)
+                .then(response => response.text())
+                .then(async result => {
+                    const data = JSON.parse(result);
+                    await fillArryPlayersDeath(data);
+                })
+                .catch(error => console.log('error', error));
+        }
+
+        function fillArryPlayersDeath(data) {
+            if (data.characters.hasOwnProperty('deaths')) {
+                const dateDeath = new Date(data.characters.deaths[0].time);
+                const dateCheck = new Date();
+                dateCheck.setMinutes(dateCheck.getMinutes() - 4)
+                if (dateDeath > dateCheck) {
+                    const charInfo = {
+                        name: data.characters.character.name,
+                        level: data.characters.character.level,
+                        vocation: data.characters.character.vocation,
+                        residence: data.characters.character.residence,
+                        guild: data.characters.character.guild.name,
+                        assasin: data.characters.deaths[0].killers[0].name,
+                        hourDeath: data.characters.deaths[0].time,
+                        createdAt: new Date(),
+                    }
+                    for (let i = 0; i < playersDeath.length; i++) {
+                        if (playersDeath[i].name === data.characters.character.name && playersDeath[i].hourDeath === data.characters.deaths[0].time) {
+                            return;
+                        }
+                    }
+                    playersDeath.push(charInfo);
+                    let div = document.createElement("div");
+                    div.innerHTML += `Nombre: ${data.characters.character.name} | Level: ${data.characters.character.level} | Vocacion:  ${data.characters.character.vocation} | Residencia:  ${data.characters.character.residence} | Guild: ${data.characters.character.guild.name} | Asesinado por: ${data.characters.deaths[0].killers[0].name} | Encontrado a: ${charInfo.createdAt}`;
+                    let divInfo = document.getElementById("charsInfo");
+                    divInfo.append(div);
+                    deaths++;
+                    return
+                }
+            }
+        }
+        /* async function analizeWorld() {
+            if (world.length < 1) {
+                alert("Select world for scan");
+                return;
+            }
+            let requestOptions = {
+                method: 'GET',
+                redirect: 'follow'
+            };
+            await fetch(`https://www.tibia.com/community/?subtopic=worlds&world=${world}&order=level_desc`, requestOptions)
+                .then(response => response.text())
+                .then(result => {
+                    let players = [];
+                    deaths = 0;
+                    playersOnline(result);
+                })
+                .catch(error => console.log('error', error));
+        } */
+
+
+        /*        async function playersOnline(html) {
+                   const ruta = `https://www.tibia.com/community/?subtopic=characters&name=`;
+                   let encontrado = html.slice(html.indexOf(`https://www.tibia.com/community/?subtopic=characters&name=`) + ruta.length, html.length);
+                   while (stop) {
+                       let contador = 0;
+                       for (let i = 0; i < encontrado.length; i++) {
+                           if (encontrado[i] === '"') {
+                               let lvlChar = `<td style="width:10%;">`;
+                               let level = encontrado.slice(encontrado.indexOf(lvlChar) + lvlChar.length)
+                               for (let i = 0; i < html.length; i++) {
+                                   if (level[i] === '<') {
+                                       const lvl = parseInt(level.slice(0, i));
+                                       if (lvl >= 300) {
+                                           players.push(encontrado.slice(0, contador).replaceAll("+", " "));
+                                       }
+                                       break;
+                                   }
+                               }
+                               encontrado = encontrado.slice(encontrado.indexOf(`https://www.tibia.com/community/?subtopic=characters&name=`) + ruta.length, encontrado.length);
+                               break;
+                           }
+                           contador++;
+                       }
+                       encontrado.includes(ruta) === true ? stop = true : stop = false;
+                   }
+                   console.log(players);
+                   for (let player of players) {
+                       await getLastDeathPlayer(player);
+                   }       
+                   console.log("Analizados " + players.length + " jugadores, muertos recientemente: " + deaths);
+                   init === true ? analizeWorld(html) : init = false;
+               } */
+
+    </script>
+</body>
+
+</html>
