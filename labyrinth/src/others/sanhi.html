@@ -125,43 +125,48 @@
                 alert("Select world for scan");
                 return;
             }
-            let players = [];
-            deaths = 0;
-            await fetch(`https://api.tibiadata.com/v3/world/${world}`)
+            await fetch(`https://api.tibiadata.com/v3/world/${world}`, {cache: "no-cache"})
                 .then(response => response.text())
                 .then(async result => {
                     const data = JSON.parse(result);
-                    const playersOnline = data.worlds.world.online_players
+                    await fillArrayPlayersOnline(data)
+                })
+                .catch(error => console.log('error', error));
+        }
+        function test(){
+
+        }
+
+        async function fillArrayPlayersOnline(data){    
+            const playersOnline = data.worlds.world.online_players;
                     for (let player of playersOnline) {
-                        if (player.level >= 1) {
+                        if (player.level >= 400) {
                             players.push(player.name);
                         }
                     }
                     console.log(players);
                     for (let player of players) {
-                        console.log("Comprobando...");
                         await getLastDeathPlayer(player);
                     }
+                    players = [];
                     init === true ? infiniteLoop() : init = false;
-                })
-                .catch(error => console.log('error', error));
         }
 
         async function getLastDeathPlayer(player) {
-            await fetch(`https://api.tibiadata.com/v3/character/${player}`)
+            await fetch(`https://api.tibiadata.com/v3/character/${player}`, {cache: "no-cache"})
                 .then(response => response.text())
                 .then(async result => {
                     const data = JSON.parse(result);
                     await fillArryPlayersDeath(data);
                 })
                 .catch(error => console.log('error', error));
-        }
+        }        
 
         function fillArryPlayersDeath(data) {
             if (data.characters.hasOwnProperty('deaths')) {
                 const dateDeath = new Date(data.characters.deaths[0].time);
                 const dateCheck = new Date();
-                dateCheck.setMinutes(dateCheck.getMinutes() - 4)
+                dateCheck.setMinutes(dateCheck.getMinutes() - 8)
                 if (dateDeath > dateCheck) {
                     const charInfo = {
                         name: data.characters.character.name,
@@ -240,7 +245,6 @@
                    console.log("Analizados " + players.length + " jugadores, muertos recientemente: " + deaths);
                    init === true ? analizeWorld(html) : init = false;
                } */
-
     </script>
 </body>
 
