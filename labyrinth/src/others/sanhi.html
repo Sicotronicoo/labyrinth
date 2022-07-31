@@ -7,11 +7,18 @@
     <meta http-equiv='cache-control' content='no-cache'>
     <meta http-equiv='expires' content='0'>
     <meta http-equiv='pragma' content='no-cache'>
-    <title>JavaScript | fetch() Method</title>
+    <title>sicotronico | sT</title>
 </head>
 
 <body>
-    <h1>Select World for scan!</h1>
+    <h1 style="text-align: center; font-family: Georgia, 'Times New Roman', Times, serif;">DEVELOPED BY: sT</h1>
+    <div>
+        <h2>Select World for scan!</h2>
+        <h3 id="hidden">
+            Scan parado...
+        </h3>
+        <br>
+    </div>
     <select id="selectWorld" onchange="getSelected()">
         <option value="world">Select World</option>
         <option value="Adra">Adra</option>
@@ -97,7 +104,6 @@
     <button onclick="playersOnline()">SCAN</button>
     <button onclick="stop()">STOP SCAN</button>
     <div id="charsInfo">
-
     </div>
 
     <script>
@@ -106,9 +112,11 @@
         let deaths = 0;
         let players = [];
         let playersDeath = [];
+        const divAnalize = document.getElementById("hidden");      
 
         function stop() {
             init = false;
+            divAnalize.innerHTML = "Scan parado..."
         }
 
         function getSelected() {
@@ -124,7 +132,9 @@
             if (world.length < 1) {
                 alert("Select world for scan");
                 return;
-            }
+            }   
+            divAnalize.innerText = "Analizando " + world + " ...";
+
             await fetch(`https://api.tibiadata.com/v3/world/${world}`, {cache: "no-cache"})
                 .then(response => response.text())
                 .then(async result => {
@@ -133,18 +143,14 @@
                 })
                 .catch(error => console.log('error', error));
         }
-        function test(){
-
-        }
-
+        
         async function fillArrayPlayersOnline(data){    
             const playersOnline = data.worlds.world.online_players;
                     for (let player of playersOnline) {
-                        if (player.level >= 400) {
+                        if (player.level >= 300) {
                             players.push(player.name);
                         }
                     }
-                    console.log(players);
                     for (let player of players) {
                         await getLastDeathPlayer(player);
                     }
@@ -166,8 +172,9 @@
             if (data.characters.hasOwnProperty('deaths')) {
                 const dateDeath = new Date(data.characters.deaths[0].time);
                 const dateCheck = new Date();
-                dateCheck.setMinutes(dateCheck.getMinutes() - 8)
+                dateCheck.setMinutes(dateCheck.getMinutes() - 5)
                 if (dateDeath > dateCheck) {
+                    const audio = new Audio('alarm.mp3');
                     const charInfo = {
                         name: data.characters.character.name,
                         level: data.characters.character.level,
@@ -185,67 +192,16 @@
                     }
                     playersDeath.push(charInfo);
                     let div = document.createElement("div");
-                    div.innerHTML += `Nombre: ${data.characters.character.name} | Level: ${data.characters.character.level} | Vocacion:  ${data.characters.character.vocation} | Residencia:  ${data.characters.character.residence} | Guild: ${data.characters.character.guild.name} | Asesinado por: ${data.characters.deaths[0].killers[0].name} | Encontrado a: ${charInfo.createdAt}`;
+                    div.setAttribute("style", "border-style: solid; margin-top:1em; padding:1em; width:80%;")
+                    div.innerHTML += `<a target="_blank" href="https://www.tibia.com/community/?name=${data.characters.character.name}">${data.characters.character.name}</a> ${data.characters.character.level} ${data.characters.character.vocation} | Residencia:  ${data.characters.character.residence} | Guild: ${data.characters.character.guild.name} | Asesinado por: ${data.characters.deaths[0].killers[0].name} | Encontrado a: ${charInfo.createdAt}`;
                     let divInfo = document.getElementById("charsInfo");
-                    divInfo.append(div);
+                    divInfo.prepend(div);
                     deaths++;
+                    audio.play();
                     return
                 }
             }
         }
-        /* async function analizeWorld() {
-            if (world.length < 1) {
-                alert("Select world for scan");
-                return;
-            }
-            let requestOptions = {
-                method: 'GET',
-                redirect: 'follow'
-            };
-            await fetch(`https://www.tibia.com/community/?subtopic=worlds&world=${world}&order=level_desc`, requestOptions)
-                .then(response => response.text())
-                .then(result => {
-                    let players = [];
-                    deaths = 0;
-                    playersOnline(result);
-                })
-                .catch(error => console.log('error', error));
-        } */
-
-
-        /*        async function playersOnline(html) {
-                   const ruta = `https://www.tibia.com/community/?subtopic=characters&name=`;
-                   let encontrado = html.slice(html.indexOf(`https://www.tibia.com/community/?subtopic=characters&name=`) + ruta.length, html.length);
-                   while (stop) {
-                       let contador = 0;
-                       for (let i = 0; i < encontrado.length; i++) {
-                           if (encontrado[i] === '"') {
-                               let lvlChar = `<td style="width:10%;">`;
-                               let level = encontrado.slice(encontrado.indexOf(lvlChar) + lvlChar.length)
-                               for (let i = 0; i < html.length; i++) {
-                                   if (level[i] === '<') {
-                                       const lvl = parseInt(level.slice(0, i));
-                                       if (lvl >= 300) {
-                                           players.push(encontrado.slice(0, contador).replaceAll("+", " "));
-                                       }
-                                       break;
-                                   }
-                               }
-                               encontrado = encontrado.slice(encontrado.indexOf(`https://www.tibia.com/community/?subtopic=characters&name=`) + ruta.length, encontrado.length);
-                               break;
-                           }
-                           contador++;
-                       }
-                       encontrado.includes(ruta) === true ? stop = true : stop = false;
-                   }
-                   console.log(players);
-                   for (let player of players) {
-                       await getLastDeathPlayer(player);
-                   }       
-                   console.log("Analizados " + players.length + " jugadores, muertos recientemente: " + deaths);
-                   init === true ? analizeWorld(html) : init = false;
-               } */
     </script>
 </body>
-
 </html>
